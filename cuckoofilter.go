@@ -21,7 +21,7 @@ func NewCuckooFilter(capacity uint) *CuckooFilter {
 	}
 	buckets := make([]bucket, capacity)
 	for i := range buckets {
-		buckets[i] = [bucketSize]byte{}
+		buckets[i] = [bucketSize]FingerprintType{}
 	}
 	return &CuckooFilter{buckets, 0}
 }
@@ -62,7 +62,7 @@ func (cf *CuckooFilter) InsertUnique(data []byte) bool {
 	return cf.Insert(data)
 }
 
-func (cf *CuckooFilter) insert(fp byte, i uint) bool {
+func (cf *CuckooFilter) insert(fp FingerprintType, i uint) bool {
 	if cf.buckets[i].insert(fp) {
 		cf.count++
 		return true
@@ -70,7 +70,7 @@ func (cf *CuckooFilter) insert(fp byte, i uint) bool {
 	return false
 }
 
-func (cf *CuckooFilter) reinsert(fp byte, i uint) bool {
+func (cf *CuckooFilter) reinsert(fp FingerprintType, i uint) bool {
 	for k := 0; k < maxCuckooCount; k++ {
 		j := rand.Intn(bucketSize)
 		oldfp := fp
@@ -92,7 +92,7 @@ func (cf *CuckooFilter) Delete(data []byte) bool {
 	return cf.delete(fp, i1) || cf.delete(fp, i2)
 }
 
-func (cf *CuckooFilter) delete(fp byte, i uint) bool {
+func (cf *CuckooFilter) delete(fp FingerprintType, i uint) bool {
 	if cf.buckets[i].delete(fp) {
 		cf.count--
 		return true
@@ -106,8 +106,8 @@ func (cf *CuckooFilter) Count() uint {
 }
 
 // Encode returns a byte slice representing a Cuckoofilter
-func (cf *CuckooFilter) Encode() []byte {
-	bytes := make([]byte, len(cf.buckets)*bucketSize)
+func (cf *CuckooFilter) Encode() []FingerprintType {
+	bytes := make([]FingerprintType, len(cf.buckets)*bucketSize)
 	for i, b := range cf.buckets {
 		for j, f := range b {
 			index := (i * len(b)) + j
@@ -118,12 +118,12 @@ func (cf *CuckooFilter) Encode() []byte {
 }
 
 // Decode returns a Cuckoofilter from a byte slice
-func Decode(bytes []byte) (*CuckooFilter, error) {
+func Decode(bytes []FingerprintType) (*CuckooFilter, error) {
 	var count uint
-	if len(bytes)%4 != 0 {
-		return nil, fmt.Errorf("expected bytes to be multiuple of 4, got %d", len(bytes))
+	if len(bytes)%bucketSize != 0 {
+		return nil, fmt.Errorf("expected bytes to be multiuple of %d, got %d", len(bytes), bucketSize)
 	}
-	buckets := make([]bucket, len(bytes)/4)
+	buckets := make([]bucket, len(bytes)/bucketSize)
 	for i, b := range buckets {
 		for j := range b {
 			index := (i * len(b)) + j

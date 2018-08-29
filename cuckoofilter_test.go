@@ -45,8 +45,8 @@ func TestInsertion(t *testing.T) {
 func TestEncodeDecode(t *testing.T) {
 	cf := NewCuckooFilter(8)
 	cf.buckets = []bucket{
-		[4]byte{1, 2, 3, 4},
-		[4]byte{5, 6, 7, 8},
+		[bucketSize]FingerprintType{1, 2, 3, 4},
+		[bucketSize]FingerprintType{5, 6, 7, 8},
 	}
 	cf.count = 8
 	bytes := cf.Encode()
