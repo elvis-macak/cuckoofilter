@@ -21,7 +21,8 @@ import "fmt"
 import "github.com/seiflotfy/cuckoofilter"
 
 func main() {
-  cf := cuckoofilter.NewDefaultCuckooFilter()
+  cf, capacity := cuckoofilter.NewDefaultCuckooFilter()
+  fmt.Println(capacity) // the real capacity
   cf.InsertUnique([]byte("geeky ogre"))
 
   // Lookup a string (and it a miss) if it exists in the cuckoofilter

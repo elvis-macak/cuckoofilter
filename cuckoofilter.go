@@ -14,7 +14,7 @@ type CuckooFilter struct {
 }
 
 //NewCuckooFilter returns a new cuckoofilter with a given capacity
-func NewCuckooFilter(capacity uint) *CuckooFilter {
+func NewCuckooFilter(capacity uint) (*CuckooFilter, uint) {
 	capacity = getNextPow2(uint64(capacity)) / bucketSize
 	if capacity == 0 {
 		capacity = 1
@@ -23,11 +23,11 @@ func NewCuckooFilter(capacity uint) *CuckooFilter {
 	for i := range buckets {
 		buckets[i] = [bucketSize]FingerprintType{}
 	}
-	return &CuckooFilter{buckets, 0}
+	return &CuckooFilter{buckets, 0}, capacity * bucketSize
 }
 
 //NewDefaultCuckooFilter returns a new cuckoofilter with the default capacity of 1000000
-func NewDefaultCuckooFilter() *CuckooFilter {
+func NewDefaultCuckooFilter() (*CuckooFilter, uint) {
 	return NewCuckooFilter(1000000)
 }
 

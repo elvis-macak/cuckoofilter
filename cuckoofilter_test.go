@@ -9,7 +9,10 @@ import (
 )
 
 func TestInsertion(t *testing.T) {
-	cf := NewCuckooFilter(1000000)
+	cf, capacity := NewCuckooFilter(1000000)
+	if float32(1000000)/float32(capacity) < 0.95 {
+		t.Errorf("Expected capacity usage must larger than 0.95")
+	}
 	fd, err := os.Open("/usr/share/dict/words")
 	if err != nil {
 		fmt.Println(err.Error())
@@ -43,7 +46,10 @@ func TestInsertion(t *testing.T) {
 }
 
 func TestEncodeDecode(t *testing.T) {
-	cf := NewCuckooFilter(8)
+	cf, capacity := NewCuckooFilter(8)
+	if capacity != 8 {
+		t.Errorf("Expected capacity is 8")
+	}
 	cf.buckets = []bucket{
 		[bucketSize]FingerprintType{1, 2, 3, 4},
 		[bucketSize]FingerprintType{5, 6, 7, 8},
